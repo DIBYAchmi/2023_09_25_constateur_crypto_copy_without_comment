@@ -290,7 +290,7 @@ void printAllData() {
   Size = EEPROM.read(endRomMemory);
   for (int i = 0; i < Size; i++)
   {
-    DynamicJsonDocument doc(200);
+    // DynamicJsonDocument doc(200);
     char   message[16], message1[16]; 
     String check = "", date = "";
 
@@ -446,12 +446,15 @@ void sendCrypto(String Indice, String Date, String RFID){
   memcpy(iv, original_iv, BLOCK_SIZE);
   char plaintext[200]; 
   byte ciphertext[200];
-  DynamicJsonDocument doc(200);
+  // DynamicJsonDocument doc(200);
   DynamicJsonDocument send(300);
   String data="";
-  doc[0]["code"] = RFID;
-  doc[0]["time"] =  Date;
-  serializeJson(doc, plaintext);
+  // doc[0]["code"] = RFID;
+  // doc[0]["time"] =  Date;
+  // serializeJson(doc, plaintext);
+  //[{"code":"12345678","time":"2023-09-18 18:17:23.123"}]
+  String text = "[{\"code\":\"" + RFID + "\",\"time\":\"" + Date + "\"}]";
+  text.toCharArray(plaintext, sizeof(plaintext));
   int enc_len = aesLib.encrypt((byte*)plaintext, strlen(plaintext), ciphertext, key, 256, iv); 
   for (int i = 0; i < enc_len; i++) {
     if(ciphertext[i] < 0x10)  data += "0";
@@ -463,7 +466,7 @@ void sendCrypto(String Indice, String Date, String RFID){
   SerialBT.print(' ');
   serializeJson(send, SerialBT);
   SerialBT.print('#');
-  doc.clear();
+  // doc.clear();
   send.clear();
   memset(plaintext, 0, sizeof(plaintext));
   memset(ciphertext, 0, sizeof(ciphertext));
@@ -524,7 +527,7 @@ void storeInEEPROM(String code, String date, int indice, boolean envoi) {
 
 // Fonction mise à jour pour envoyer des données
 void sendData(String code, String date, int indice) {
-  DynamicJsonDocument doc(200);
+  // DynamicJsonDocument doc(200);
   String Da = date.substring(4, 8) + "-" + date.substring(2, 4) + "-" + date.substring(0, 2) + " " + date.substring(8, 10) + ":"
               + date.substring(10, 12) + ":" + date.substring(12, 14) + "." + date.substring(14, 17);
   
