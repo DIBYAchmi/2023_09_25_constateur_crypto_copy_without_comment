@@ -173,33 +173,6 @@ void loop() {
 
 
 
-
-
-
-void sendData(String code, String date, int indice ) {
-  DynamicJsonDocument doc(200);
-  String Da = date.substring(4, 8) + "-" + date.substring(2, 4) + "-" + date.substring(0, 2) + " " + date.substring(8, 10) + ":"
-              + date.substring(10, 12) + ":" + date.substring(12, 14) + "." + date.substring(14, 17);
-  
-  sendCrypto(String(indice), Da, code);
-
-  String writeinfo = code + filtrage_number(indice) + "1" + "0000";
-
-  char writebuffer[16], writebuffer1[16];
-  for (int x = 0; x < 16; x++) {
-    writebuffer[x] = writeinfo[x]; 
-    writebuffer1[x] = date[x];
-  }
-
-  eeprom.write(indice * 32, (byte*) writebuffer1, sizeof(writebuffer1));
-  delay(15);
-  eeprom.write(indice * 32 + 16, (byte*) writebuffer, sizeof(writebuffer));
-  delay(15);
-
-
-}
-
-
 void printStoreTag() {
 
   int Size ;
@@ -233,37 +206,6 @@ void printStoreTag() {
 
 }
 
-
-
-void Storage(String code, boolean envoi)
-{
-  int indice;
-  indice = EEPROM.read(indiceMemory);
-  String info = code + filtrage_number(indice) + String(envoi) + "0000";
-  String writeinfo = info;
-  String writedate = Date();
-
-  char writebuffer[16],  writebuffer1[16];
-  for (int x = 0; x < 16; x++) {
-    writebuffer[x] = writedate[x]; 
-    writebuffer1[x] = writeinfo[x]; 
-  }
-  eeprom.write(indice * 32, (byte*) writebuffer, sizeof(writebuffer));
-  delay(10);
-  eeprom.write(indice * 32 + 16, (byte*) writebuffer1, sizeof(writebuffer1));
-  delay(10);
-  indice++;
-  int Endrom;
-  Endrom = EEPROM.read(endRomMemory);
-  if (Endrom < 1000)Endrom++;
-
-  EEPROM.write(endRomMemory, Endrom);
-  EEPROM.commit();
-
-  EEPROM.write(indiceMemory, indice);
-  EEPROM.commit();
-
-}
 
 
 
@@ -564,4 +506,51 @@ void processData(Stream &serialInput, String &data) {
   }
 }
 
+// Nouvelle fonction pour stocker des données dans l'EEPROM
+void storeInEEPROM(String code, String date, int indice, boolean envoi) {
+  String writeinfo = code + filtrage_number(indice) + String(envoi) + "0000";
+  char writebuffer[16], writebuffer1[16];
+  
+  for (int x = 0; x < 16; x++) {
+    writebuffer[x] = date[x]; 
+    writebuffer1[x] = writeinfo[x];
+  }
+
+  eeprom.write(indice * 32, (byte*) writebuffer, sizeof(writebuffer));
+  delay(15);
+  eeprom.write(indice * 32 + 16, (byte*) writebuffer1, sizeof(writebuffer1));
+  delay(15);
+}
+
+// Fonction mise à jour pour envoyer des données
+void sendData(String code, String date, int indice) {
+  DynamicJsonDocument doc(200);
+  String Da = date.substring(4, 8) + "-" + date.substring(2, 4) + "-" + date.substring(0, 2) + " " + date.substring(8, 10) + ":"
+              + date.substring(10, 12) + ":" + date.substring(12, 14) + "." + date.substring(14, 17);
+  
+  sendCrypto(String(indice), Da, code);
+
+  // Utilisez la nouvelle fonction pour stocker dans l'EEPROM
+  storeInEEPROM(code, date, indice, true);  // 'true' car les données sont toujours envoyées dans cette fonction
+}
+
+// Fonction mise à jour pour le stockage
+void Storage(String code, boolean envoi) {
+  int indice;
+  indice = EEPROM.read(indiceMemory);
+  
+  // Utilisez la nouvelle fonction pour stocker dans l'EEPROM
+  storeInEEPROM(code, Date(), indice, envoi);
+
+  indice++;
+  int Endrom;
+  Endrom = EEPROM.read(endRomMemory);
+  if (Endrom < 1000) Endrom++;
+
+  EEPROM.write(endRomMemory, Endrom);
+  EEPROM.commit();
+
+  EEPROM.write(indiceMemory, indice);
+  EEPROM.commit();
+}
 
