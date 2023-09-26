@@ -157,7 +157,7 @@ void loop() {
       int moyen= 0;
       // DynamicJsonDocument doc(200);
       // doc[0]["batterie"] =String(moyen);
-      //[{"batterie":"65"}]
+      //[{"batterie":"65"}]ffff
       String text = "[{\"batterie\":\"" + String(moyen) + "\"}]";
   
       SerialBT.print(' ');
