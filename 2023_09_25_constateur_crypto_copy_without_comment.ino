@@ -17,6 +17,8 @@
 
 #define KEY_LENGTH 32
 #define BLOCK_SIZE 16
+#define RXD 16
+#define TXD 5
 AESLib aesLib;
 byte original_iv[BLOCK_SIZE];
 byte key[KEY_LENGTH] = {0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30, 0x31}; 
@@ -24,9 +26,9 @@ byte iv[BLOCK_SIZE] = {0xbb, 0x16, 0xd3, 0xb0, 0x77, 0x5c, 0x4d, 0x3b, 0x6b, 0x0
 
 WS2812FX ws2812fx = WS2812FX(1, 27, NEO_GRB + NEO_KHZ800);
 
-RTC_DS3231 rtc;
+// RTC_DS3231 rtc;
 DateTime MyDateAndTime;
-char daysOfTheWeek[7][12] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
+// char daysOfTheWeek[7][12] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
 
 BluetoothSerial SerialBT;
 Eeprom_at24c256 eeprom(0x50);
@@ -36,15 +38,13 @@ int Connect = 1;
 int Supprime;
 
 
-int eeAddress = 0;
-int buzz = 19, state = 5, inputbuzz = 18, inputbutt = 19, deltaMilli = 0, lastBattery = 100;
-int indiceMemory = 0 , endRomMemory = 10, deletMemory = 15, deltaMilliMemory = 20;
-long Time_Red_Led = millis() + 60000;
+// int eeAddress = 0;
+// int buzz = 19, state = 5, inputbuzz = 18, inputbutt = 19, deltaMilli = 0, lastBattery = 100;
+int indiceMemory = 0 , endRomMemory = 10, deletMemory = 15, deltaMilliMemory = 20, deltaMilli = 0;
+// long Time_Red_Led = millis() + 60000;
 
 
 HardwareSerial esp(2);
-#define RXD 16
-#define TXD 5
 String Data1, Data2,Data3, code, tag;
 bool newcode = false;
 
@@ -164,7 +164,7 @@ void loop() {
       SerialBT.print(text);
       // serializeJson(doc, SerialBT);
       SerialBT.print('#');
-      lastBattery = moyen;
+      // lastBattery = moyen;
   
       }
   
