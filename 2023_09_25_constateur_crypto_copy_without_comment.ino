@@ -1,6 +1,6 @@
 #include <HardwareSerial.h>
 #include <Eeprom_at24c256.h>
-#include <ArduinoJson.h>
+// #include <ArduinoJson.h>
 #include "RTClib.h"
 #include <EEPROM.h>
 #include <AESLib.h>
@@ -155,12 +155,14 @@ void loop() {
      else if(data[0]== 'B'){
   
       int moyen= 0;
-      DynamicJsonDocument doc(200);
-      doc[0]["batterie"] =String(moyen);
-  
+      // DynamicJsonDocument doc(200);
+      // doc[0]["batterie"] =String(moyen);
+      //[{"batterie":"65"}]
+      String text = "[{\"batterie\":\"" + String(moyen) + "\"}]";
   
       SerialBT.print(' ');
-      serializeJson(doc, SerialBT);
+      SerialBT.print(text);
+      // serializeJson(doc, SerialBT);
       SerialBT.print('#');
       lastBattery = moyen;
   
@@ -325,12 +327,14 @@ void toutSupprimer()
 
   EEPROM.write(deletMemory, 0);
   EEPROM.commit();
+//[{"message":"Supprimer"}]
+  String text = "[{\"message\":\"supprimer\"}]";
+  // DynamicJsonDocument doc(200);
 
-  DynamicJsonDocument doc(200);
-
-  doc[0]["message"] = "Supprimer";
+  // doc[0]["message"] = "Supprimer";
   SerialBT.print(' ');
-  serializeJson(doc, SerialBT);
+  SerialBT.print(text);
+  // serializeJson(doc, SerialBT);
   SerialBT.print('#');
 
 }
@@ -447,7 +451,7 @@ void sendCrypto(String Indice, String Date, String RFID){
   char plaintext[200]; 
   byte ciphertext[200];
   // DynamicJsonDocument doc(200);
-  DynamicJsonDocument send(300);
+  // DynamicJsonDocument send(300);
   String data="";
   // doc[0]["code"] = RFID;
   // doc[0]["time"] =  Date;
@@ -460,14 +464,17 @@ void sendCrypto(String Indice, String Date, String RFID){
     if(ciphertext[i] < 0x10)  data += "0";
       data += String(ciphertext[i], HEX);
   }
-  send[0]["indice"] = Indice;
-  send[0]["time"] =  Date;
-  send[0]["data"] =  data;
+  // send[0]["indice"] = Indice;
+  // send[0]["time"] =  Date;
+  // send[0]["data"] =  data;
+  //[{"indice":"1","time":"2023-09-18 18:17:23.123","data":"f48c22376ab37c0ee1d4f58a318a4c5a9f1e36dfdf61a8f73e2c998fb30daaeb362d01ce0743ce168c99286347ed5d1f4df5fda38f285be114729fbf778"}]
+  text = "[{\"indice\":\"" + Indice + "\",\"time\":\"" + Date + "\",\"data\":\"" + data +"\"}]";
   SerialBT.print(' ');
-  serializeJson(send, SerialBT);
+  SerialBT.print(text);
+  // serializeJson(send, SerialBT);
   SerialBT.print('#');
   // doc.clear();
-  send.clear();
+  // send.clear();
   memset(plaintext, 0, sizeof(plaintext));
   memset(ciphertext, 0, sizeof(ciphertext));
   memcpy(iv, original_iv, BLOCK_SIZE);
