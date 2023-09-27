@@ -73,105 +73,183 @@ void setup() {
   ws2812fx.service(); 
 }
 
-void loop() {
+// void loop() {
 
-  if(SerialBT.connected()){
+//   if(SerialBT.connected()){
   
-      if(Connect==1)
-     {
-       printStoreTag();
-       Connect=0;
-     }
-    }
-   else if(Connect ==0)Connect=1;
+//       if(Connect==1)
+//      {
+//        printStoreTag();
+//        Connect=0;
+//      }
+//     }
+//    else if(Connect ==0)Connect=1;
 
 
-  processData(esp, Data1);
-  processData(Serial, Data3);
-  processData(Serial1, Data2);
+//   processData(esp, Data1);
+//   processData(Serial, Data3);
+//   processData(Serial1, Data2);
  
-  if(newcode){
+//   if(newcode){
   
-        newcode=false;
-        String date=Date();
-        String Da=date.substring(4,8)+"-"+date.substring(2,4)+"-"+date.substring(0,2)+" "+date.substring(8,10) +":"
-                     +date.substring(10,12) +":"+date.substring(12,14)+"."+date.substring(14,17);
+//         newcode=false;
+//         String date=Date();
+//         String Da=date.substring(4,8)+"-"+date.substring(2,4)+"-"+date.substring(0,2)+" "+date.substring(8,10) +":"
+//                      +date.substring(10,12) +":"+date.substring(12,14)+"."+date.substring(14,17);
   
-        tag=code.substring(2,10);
+//         tag=code.substring(2,10);
   
-     if(Check_secret(code)){
-            if(tag=="12345678"){
-               if(SerialBT.connected()) {
-                Sound(1);
+//      if(Check_secret(code)){
+//             if(tag=="12345678"){
+//                if(SerialBT.connected()) {
+//                 Sound(1);
 
-               sendCrypto("ii", Da, tag);
-               }
-               else Sound(0);
-              }
-          else if( checkNewTag(tag)){
-             int indice;
-             int endr;
-             indice=EEPROM.read(0);
-             endr=EEPROM.read(10);
+//                sendCrypto("ii", Da, tag);
+//                }
+//                else Sound(0);
+//               }
+//           else if( checkNewTag(tag)){
+//              int indice;
+//              int endr;
+//              indice=EEPROM.read(0);
+//              endr=EEPROM.read(10);
   
-             if(SerialBT.connected()) {
-              Sound(1);
-              sendData(tag,Date(),indice);
-              indice++;
-              endr++;
-              EEPROM.write(0,indice);
-              EEPROM.commit();
-              EEPROM.write(10,endr);
-              EEPROM.commit();
+//              if(SerialBT.connected()) {
+//               Sound(1);
+//               sendData(tag,Date(),indice);
+//               indice++;
+//               endr++;
+//               writeToEEPROM(0,indice);
+//               // EEPROM.write(0,indice);
+//               // EEPROM.commit();
+//               writeToEEPROM(10,endr);
+//               // EEPROM.write(10,endr);
+//               // EEPROM.commit();
   
-             }
-             else {
-              Storage(tag,false);
-              Sound(0);
+//              }
+//              else {
+//               Storage(tag,false);
+//               Sound(0);
   
-             }
+//              }
   
-           }
-  
-  
-  
-  
-          }
+//            }
   
   
-  }
   
   
-  if(SerialBT.available())
-    {
-      String data=  SerialBT.readStringUntil('\r');
-    if(check(data).equals("date"))
-      {
-            reglage_heur((data));
+//           }
   
+  
+//   }
+  
+  
+//   if(SerialBT.available())
+//     {
+//       String data=  SerialBT.readStringUntil('\r');
+//     if(check(data).equals("date"))
+//       {
+//             reglage_heur((data));
+  
+//         }
+//       else if(data[0] == 'S'){ toutSupprimer();}
+//       else if(data[0]== 'P') printAllData();
+//      else if(data[0]== 'B'){
+  
+//       int moyen= 0;
+//       // DynamicJsonDocument doc(200);
+//       // doc[0]["batterie"] =String(moyen);
+//       //[{"batterie":"65"}]ffff
+//       String text = " [{\"batterie\":\"" + String(moyen) + "\"}]#";
+  
+//       // SerialBT.print(' ');
+//       SerialBT.print(text);
+//       // serializeJson(doc, SerialBT);
+//       // SerialBT.print('#');
+//       // lastBattery = moyen;
+  
+//       }
+  
+//     }
+
+
+// }
+
+void loop() {
+    handleBluetoothConnection();
+
+    processData(esp, Data1);
+    processData(Serial, Data3);
+    processData(Serial1, Data2);
+
+    if (newcode) {
+        newcode = false;
+        String date = Date();
+        String Da = formatDate(date);
+        tag = code.substring(2, 10);
+
+        if (Check_secret(code)) {
+            if (tag == "12345678") {
+                if (SerialBT.connected()) {
+                    Sound(1);
+                    sendCrypto("ii", Da, tag);
+                } else {
+                    Sound(0);
+                }
+            } else if (checkNewTag(tag)) {
+                int indice = EEPROM.read(0);
+                int endr = EEPROM.read(10);
+
+                if (SerialBT.connected()) {
+                    Sound(1);
+                    sendData(tag, Date(), indice);
+                    writeToEEPROM(0, ++indice);
+                    writeToEEPROM(10, ++endr);
+                } else {
+                    Storage(tag, false);
+                    Sound(0);
+                }
+            }
         }
-      else if(data[0] == 'S'){ toutSupprimer();}
-      else if(data[0]== 'P') printAllData();
-     else if(data[0]== 'B'){
-  
-      int moyen= 0;
-      // DynamicJsonDocument doc(200);
-      // doc[0]["batterie"] =String(moyen);
-      //[{"batterie":"65"}]ffff
-      String text = "[{\"batterie\":\"" + String(moyen) + "\"}]";
-  
-      SerialBT.print(' ');
-      SerialBT.print(text);
-      // serializeJson(doc, SerialBT);
-      SerialBT.print('#');
-      // lastBattery = moyen;
-  
-      }
-  
     }
 
-
+    if (SerialBT.available()) {
+        handleReceivedData(SerialBT.readStringUntil('\r'));
+    }
 }
+
+void handleBluetoothConnection() {
+    if (SerialBT.connected()) {
+        if (Connect == 1) {
+            printStoreTag();
+            Connect = 0;
+        }
+    } else {
+        Connect = 1;
+    }
+}
+
+void handleReceivedData(String data) {
+    if (check(data).equals("date")) {
+        reglage_heur(data);
+    } else if (data[0] == 'S') {
+        toutSupprimer();
+    } else if (data[0] == 'P') {
+        printAllData();
+    } else if (data[0] == 'B') {
+        int moyen = 0;
+        String text = " [{\"batterie\":\"" + String(moyen) + "\"}]#";
+        SerialBT.print(text);
+    }
+}
+
+String formatDate(String date) {
+    return date.substring(4, 8) + "-" + date.substring(2, 4) + "-" + date.substring(0, 2) + " " + 
+           date.substring(8, 10) + ":" + date.substring(10, 12) + ":" + 
+           date.substring(12, 14) + "." + date.substring(14, 17);
+}
+
+
 
 
 
@@ -256,33 +334,66 @@ String  filtrage_number(int indice) {
 }
 
 
-String Date() {
+// String Date() {
 
+//   MyDateAndTime = Clock.now();
+
+//   String date = "";
+//   String Day = String(MyDateAndTime.day());
+//   String Month = String(MyDateAndTime.month());
+//   String Year = String(MyDateAndTime.year());
+//   String Hour = String(MyDateAndTime.hour());
+//   String Minute = String(MyDateAndTime.minute());
+//   String Second = String(MyDateAndTime.second());;
+//   String MS = String(abs(millis() % 1000));
+//   if (Day.length() < 2 )Day = "0" + Day;
+//   if (Month.length() < 2 )Month = "0" + Month;
+//   if (Month.length() < 2 )Month = "0" + Month;
+//   if (Year.length() < 2 )Year = "0" + Year;
+//   if (Hour.length() < 2 )Hour = "0" + Hour;
+//   if (Minute.length() < 2 )Minute = "0" + Minute;
+//   if (Month.length() < 2 )Month = "0" + Month;
+//   if (Second.length() < 2 )Second = "0" + Second;
+//   if (MS.length() < 2 )MS = "00" + MS;
+//   else if (MS.length() < 3 )MS = "0" + MS;
+
+//   date = String(Day) + String(Month) + String(Year) + String(Hour) + String(Minute) + String(Second) + MS + "0";
+
+//   return date;
+
+// }
+String Date() {
   MyDateAndTime = Clock.now();
 
-  String date = "";
-  String Day = String(MyDateAndTime.day());
-  String Month = String(MyDateAndTime.month());
-  String Year = String(MyDateAndTime.year());
-  String Hour = String(MyDateAndTime.hour());
-  String Minute = String(MyDateAndTime.minute());
-  String Second = String(MyDateAndTime.second());;
-  String MS = String(abs(millis() % 1000));
-  if (Day.length() < 2 )Day = "0" + Day;
-  if (Month.length() < 2 )Month = "0" + Month;
-  if (Month.length() < 2 )Month = "0" + Month;
-  if (Year.length() < 2 )Year = "0" + Year;
-  if (Hour.length() < 2 )Hour = "0" + Hour;
-  if (Minute.length() < 2 )Minute = "0" + Minute;
-  if (Month.length() < 2 )Month = "0" + Month;
-  if (Second.length() < 2 )Second = "0" + Second;
-  if (MS.length() < 2 )MS = "00" + MS;
-  else if (MS.length() < 3 )MS = "0" + MS;
+  String formattedDate = "";
 
-  date = String(Day) + String(Month) + String(Year) + String(Hour) + String(Minute) + String(Second) + MS + "0";
+  int values[] = {
+    MyDateAndTime.day(),
+    MyDateAndTime.month(),
+    MyDateAndTime.year(),
+    MyDateAndTime.hour(),
+    MyDateAndTime.minute(),
+    MyDateAndTime.second(),
+    abs(millis() % 1000)
+  };
 
-  return date;
+  for (int i = 0; i < 7; i++) {
+    String current = String(values[i]);
+    if (i == 6) { // Special case for milliseconds
+      while (current.length() < 3) {
+        current = "0" + current;
+      }
+    } else {
+      if (current.length() < 2) {
+        current = "0" + current;
+      }
+    }
+    formattedDate += current;
+  }
 
+  formattedDate += "0"; // Appending the trailing zero
+
+  return formattedDate;
 }
 
 
@@ -306,8 +417,10 @@ void printAllData() {
       date += message[z];
 
     }
-    String Da = date.substring(4, 8) + "-" + date.substring(2, 4) + "-" + date.substring(0, 2) + " " + date.substring(8, 10) + ":"
-                + date.substring(10, 12) + ":" + date.substring(12, 14) + "." + date.substring(14, 17);
+    // String Da = date.substring(4, 8) + "-" + date.substring(2, 4) + "-" + date.substring(0, 2) + " " + date.substring(8, 10) + ":"
+    //             + date.substring(10, 12) + ":" + date.substring(12, 14) + "." + date.substring(14, 17);
+    
+    String Da = formatDate(date);
 
     sendCrypto(String(i), Da,check.substring(0, 8));
 
@@ -319,23 +432,26 @@ void printAllData() {
 
 void toutSupprimer()
 {
-  EEPROM.write(indiceMemory, 0);
-  EEPROM.commit();
+  writeToEEPROM(indiceMemory, 0);
+  // EEPROM.write(indiceMemory, 0);
+  // EEPROM.commit();
 
-  EEPROM.write(endRomMemory, 0);
-  EEPROM.commit();
+  writeToEEPROM(endRomMemory, 0);
+  // EEPROM.write(endRomMemory, 0);
+  // EEPROM.commit();
 
-  EEPROM.write(deletMemory, 0);
-  EEPROM.commit();
+  writeToEEPROM(deletMemory, 0);
+  // EEPROM.write(deletMemory, 0);
+  // EEPROM.commit();
 //[{"message":"Supprimer"}]
-  String text = "[{\"message\":\"supprimer\"}]";
+  String text = " [{\"message\":\"supprimer\"}]#";
   // DynamicJsonDocument doc(200);
 
   // doc[0]["message"] = "Supprimer";
-  SerialBT.print(' ');
+  // SerialBT.print(' ');
   SerialBT.print(text);
   // serializeJson(doc, SerialBT);
-  SerialBT.print('#');
+  // SerialBT.print('#');
 
 }
 
@@ -351,43 +467,73 @@ String check(String data) {
 
 
 
-bool Check_secret(String code)
-{
+// bool Check_secret(String code)
+// {
 
-  String code_1 = code.substring(6, 10);
-  String code_2 = code.substring(2, 6);
+//   String code_1 = code.substring(6, 10);
+//   String code_2 = code.substring(2, 6);
 
 
+//   String secret = code.substring(0, 2);
+//   String tag = code.substring(2, 10);
+
+//   uint16_t  code_1_hex = strtoul(code_1.c_str(), NULL, 16);
+//   uint16_t  code_2_hex = strtoul(code_2.c_str(), NULL, 16);
+//   uint16_t  secret_hex = strtoul(secret.c_str(), NULL, 16);
+
+//   uint16_t modulo_hex = code_1_hex % code_2_hex;
+
+
+//   if (modulo_hex > 256) modulo_hex = modulo_hex % 256;
+
+//   if (modulo_hex == secret_hex)return true;
+//   else {
+//     int allInt = 1;
+//     for (int i = 0; i < code.length(); i++) if ((code[i] >= 'A' && code[i] <= 'F')) allInt = 0;
+//     if (allInt) {
+//       int  secret_int = secret.toInt();
+//       int  code_1_int = code_1.toInt();
+//       int  code_2_int = code_2.toInt();
+//       int modulo_int = code_1_int % code_2_int;
+//       if (modulo_int > 100) modulo_int = modulo_int % 100;
+//       if (modulo_int == secret_int)return true;
+//       else return false;
+//     }
+//     else return false;
+//   }
+
+
+
+// }
+
+
+bool Check_secret(String code) {
   String secret = code.substring(0, 2);
-  String tag = code.substring(2, 10);
-
-  uint16_t  code_1_hex = strtoul(code_1.c_str(), NULL, 16);
-  uint16_t  code_2_hex = strtoul(code_2.c_str(), NULL, 16);
-  uint16_t  secret_hex = strtoul(secret.c_str(), NULL, 16);
+  uint16_t code_1_hex = strtoul(code.substring(6, 10).c_str(), NULL, 16);
+  uint16_t code_2_hex = strtoul(code.substring(2, 6).c_str(), NULL, 16);
+  uint16_t secret_hex = strtoul(secret.c_str(), NULL, 16);
 
   uint16_t modulo_hex = code_1_hex % code_2_hex;
+  if (modulo_hex > 256) modulo_hex %= 256;
 
+  if (modulo_hex == secret_hex) return true;
 
-  if (modulo_hex > 256) modulo_hex = modulo_hex % 256;
-
-  if (modulo_hex == secret_hex)return true;
-  else {
-    int allInt = 1;
-    for (int i = 0; i < code.length(); i++) if ((code[i] >= 'A' && code[i] <= 'F')) allInt = 0;
-    if (allInt) {
-      int  secret_int = secret.toInt();
-      int  code_1_int = code_1.toInt();
-      int  code_2_int = code_2.toInt();
-      int modulo_int = code_1_int % code_2_int;
-      if (modulo_int > 100) modulo_int = modulo_int % 100;
-      if (modulo_int == secret_int)return true;
-      else return false;
+  bool allInt = true;
+  for (char c : code) {
+    if (c >= 'A' && c <= 'F') {
+      allInt = false;
+      break;
     }
-    else return false;
   }
 
+  if (allInt) {
+    int secret_int = secret.toInt();
+    int modulo_int = code.substring(6, 10).toInt() % code.substring(2, 6).toInt();
+    if (modulo_int > 100) modulo_int %= 100;
+    return modulo_int == secret_int;
+  }
 
-
+  return false;
 }
 
 
@@ -418,8 +564,9 @@ void reglage_heur(String date) {
 
 
       deltaMilli = abs( milli.toInt() - millis() % 1000);
-      EEPROM.write(deltaMilliMemory, deltaMilli);
-      EEPROM.commit();
+      writeToEEPROM(deltaMilliMemory, deltaMilli);
+      // EEPROM.write(deltaMilliMemory, deltaMilli);
+      // EEPROM.commit();
 
       Clock.adjust(DateTime(anne.toInt(), mois. toInt(),  jour.toInt(), heur. toInt(), minut. toInt(), sec. toInt()));
 
@@ -468,11 +615,11 @@ void sendCrypto(String Indice, String Date, String RFID){
   // send[0]["time"] =  Date;
   // send[0]["data"] =  data;
   //[{"indice":"1","time":"2023-09-18 18:17:23.123","data":"f48c22376ab37c0ee1d4f58a318a4c5a9f1e36dfdf61a8f73e2c998fb30daaeb362d01ce0743ce168c99286347ed5d1f4df5fda38f285be114729fbf778"}]
-  text = "[{\"indice\":\"" + Indice + "\",\"time\":\"" + Date + "\",\"data\":\"" + data +"\"}]";
-  SerialBT.print(' ');
+  text = " [{\"indice\":\"" + Indice + "\",\"time\":\"" + Date + "\",\"data\":\"" + data +"\"}]#";
+  // SerialBT.print(' ');
   SerialBT.print(text);
   // serializeJson(send, SerialBT);
-  SerialBT.print('#');
+  // SerialBT.print('#');
   // doc.clear();
   // send.clear();
   memset(plaintext, 0, sizeof(plaintext));
@@ -535,9 +682,10 @@ void storeInEEPROM(String code, String date, int indice, boolean envoi) {
 // Fonction mise à jour pour envoyer des données
 void sendData(String code, String date, int indice) {
   // DynamicJsonDocument doc(200);
-  String Da = date.substring(4, 8) + "-" + date.substring(2, 4) + "-" + date.substring(0, 2) + " " + date.substring(8, 10) + ":"
-              + date.substring(10, 12) + ":" + date.substring(12, 14) + "." + date.substring(14, 17);
+  // String Da = date.substring(4, 8) + "-" + date.substring(2, 4) + "-" + date.substring(0, 2) + " " + date.substring(8, 10) + ":"
+  //             + date.substring(10, 12) + ":" + date.substring(12, 14) + "." + date.substring(14, 17);
   
+  String Da = formatDate(date);
   sendCrypto(String(indice), Da, code);
 
   // Utilisez la nouvelle fonction pour stocker dans l'EEPROM
@@ -557,10 +705,16 @@ void Storage(String code, boolean envoi) {
   Endrom = EEPROM.read(endRomMemory);
   if (Endrom < 1000) Endrom++;
 
-  EEPROM.write(endRomMemory, Endrom);
-  EEPROM.commit();
+  writeToEEPROM(endRomMemory, Endrom);
+  // EEPROM.write(endRomMemory, Endrom);
+  // EEPROM.commit();
 
-  EEPROM.write(indiceMemory, indice);
-  EEPROM.commit();
+  writeToEEPROM(indiceMemory, indice);
+  // EEPROM.write(indiceMemory, indice);
+  // EEPROM.commit();
 }
 
+void writeToEEPROM(int address, int value) {
+    EEPROM.write(address, value);
+    EEPROM.commit();
+}
