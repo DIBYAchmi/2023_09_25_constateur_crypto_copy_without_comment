@@ -1,6 +1,5 @@
 #include <HardwareSerial.h>
 #include <Eeprom_at24c256.h>
-// #include <ArduinoJson.h>
 #include "RTClib.h"
 #include <EEPROM.h>
 #include <AESLib.h>
@@ -26,9 +25,7 @@ byte iv[BLOCK_SIZE] = {0xbb, 0x16, 0xd3, 0xb0, 0x77, 0x5c, 0x4d, 0x3b, 0x6b, 0x0
 
 WS2812FX ws2812fx = WS2812FX(1, 27, NEO_GRB + NEO_KHZ800);
 
-// RTC_DS3231 rtc;
 DateTime MyDateAndTime;
-// char daysOfTheWeek[7][12] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
 
 BluetoothSerial SerialBT;
 Eeprom_at24c256 eeprom(0x50);
@@ -38,10 +35,7 @@ int Connect = 1;
 int Supprime;
 
 
-// int eeAddress = 0;
-// int buzz = 19, state = 5, inputbuzz = 18, inputbutt = 19, deltaMilli = 0, lastBattery = 100;
 int indiceMemory = 0 , endRomMemory = 10, deletMemory = 15, deltaMilliMemory = 20, deltaMilli = 0;
-// long Time_Red_Led = millis() + 60000;
 
 
 HardwareSerial esp(2);
@@ -72,108 +66,6 @@ void setup() {
   ws2812fx.setColor(BLUE);
   ws2812fx.service(); 
 }
-
-// void loop() {
-
-//   if(SerialBT.connected()){
-  
-//       if(Connect==1)
-//      {
-//        printStoreTag();
-//        Connect=0;
-//      }
-//     }
-//    else if(Connect ==0)Connect=1;
-
-
-//   processData(esp, Data1);
-//   processData(Serial, Data3);
-//   processData(Serial1, Data2);
- 
-//   if(newcode){
-  
-//         newcode=false;
-//         String date=Date();
-//         String Da=date.substring(4,8)+"-"+date.substring(2,4)+"-"+date.substring(0,2)+" "+date.substring(8,10) +":"
-//                      +date.substring(10,12) +":"+date.substring(12,14)+"."+date.substring(14,17);
-  
-//         tag=code.substring(2,10);
-  
-//      if(Check_secret(code)){
-//             if(tag=="12345678"){
-//                if(SerialBT.connected()) {
-//                 Sound(1);
-
-//                sendCrypto("ii", Da, tag);
-//                }
-//                else Sound(0);
-//               }
-//           else if( checkNewTag(tag)){
-//              int indice;
-//              int endr;
-//              indice=EEPROM.read(0);
-//              endr=EEPROM.read(10);
-  
-//              if(SerialBT.connected()) {
-//               Sound(1);
-//               sendData(tag,Date(),indice);
-//               indice++;
-//               endr++;
-//               writeToEEPROM(0,indice);
-//               // EEPROM.write(0,indice);
-//               // EEPROM.commit();
-//               writeToEEPROM(10,endr);
-//               // EEPROM.write(10,endr);
-//               // EEPROM.commit();
-  
-//              }
-//              else {
-//               Storage(tag,false);
-//               Sound(0);
-  
-//              }
-  
-//            }
-  
-  
-  
-  
-//           }
-  
-  
-//   }
-  
-  
-//   if(SerialBT.available())
-//     {
-//       String data=  SerialBT.readStringUntil('\r');
-//     if(check(data).equals("date"))
-//       {
-//             reglage_heur((data));
-  
-//         }
-//       else if(data[0] == 'S'){ toutSupprimer();}
-//       else if(data[0]== 'P') printAllData();
-//      else if(data[0]== 'B'){
-  
-//       int moyen= 0;
-//       // DynamicJsonDocument doc(200);
-//       // doc[0]["batterie"] =String(moyen);
-//       //[{"batterie":"65"}]ffff
-//       String text = " [{\"batterie\":\"" + String(moyen) + "\"}]#";
-  
-//       // SerialBT.print(' ');
-//       SerialBT.print(text);
-//       // serializeJson(doc, SerialBT);
-//       // SerialBT.print('#');
-//       // lastBattery = moyen;
-  
-//       }
-  
-//     }
-
-
-// }
 
 void loop() {
     handleBluetoothConnection();
@@ -334,34 +226,6 @@ String  filtrage_number(int indice) {
 }
 
 
-// String Date() {
-
-//   MyDateAndTime = Clock.now();
-
-//   String date = "";
-//   String Day = String(MyDateAndTime.day());
-//   String Month = String(MyDateAndTime.month());
-//   String Year = String(MyDateAndTime.year());
-//   String Hour = String(MyDateAndTime.hour());
-//   String Minute = String(MyDateAndTime.minute());
-//   String Second = String(MyDateAndTime.second());;
-//   String MS = String(abs(millis() % 1000));
-//   if (Day.length() < 2 )Day = "0" + Day;
-//   if (Month.length() < 2 )Month = "0" + Month;
-//   if (Month.length() < 2 )Month = "0" + Month;
-//   if (Year.length() < 2 )Year = "0" + Year;
-//   if (Hour.length() < 2 )Hour = "0" + Hour;
-//   if (Minute.length() < 2 )Minute = "0" + Minute;
-//   if (Month.length() < 2 )Month = "0" + Month;
-//   if (Second.length() < 2 )Second = "0" + Second;
-//   if (MS.length() < 2 )MS = "00" + MS;
-//   else if (MS.length() < 3 )MS = "0" + MS;
-
-//   date = String(Day) + String(Month) + String(Year) + String(Hour) + String(Minute) + String(Second) + MS + "0";
-
-//   return date;
-
-// }
 String Date() {
   MyDateAndTime = Clock.now();
 
@@ -403,7 +267,6 @@ void printAllData() {
   Size = EEPROM.read(endRomMemory);
   for (int i = 0; i < Size; i++)
   {
-    // DynamicJsonDocument doc(200);
     char   message[16], message1[16]; 
     String check = "", date = "";
 
@@ -417,8 +280,6 @@ void printAllData() {
       date += message[z];
 
     }
-    // String Da = date.substring(4, 8) + "-" + date.substring(2, 4) + "-" + date.substring(0, 2) + " " + date.substring(8, 10) + ":"
-    //             + date.substring(10, 12) + ":" + date.substring(12, 14) + "." + date.substring(14, 17);
     
     String Da = formatDate(date);
 
@@ -433,25 +294,13 @@ void printAllData() {
 void toutSupprimer()
 {
   writeToEEPROM(indiceMemory, 0);
-  // EEPROM.write(indiceMemory, 0);
-  // EEPROM.commit();
 
   writeToEEPROM(endRomMemory, 0);
-  // EEPROM.write(endRomMemory, 0);
-  // EEPROM.commit();
 
   writeToEEPROM(deletMemory, 0);
-  // EEPROM.write(deletMemory, 0);
-  // EEPROM.commit();
-//[{"message":"Supprimer"}]
   String text = " [{\"message\":\"supprimer\"}]#";
-  // DynamicJsonDocument doc(200);
-
-  // doc[0]["message"] = "Supprimer";
-  // SerialBT.print(' ');
+  
   SerialBT.print(text);
-  // serializeJson(doc, SerialBT);
-  // SerialBT.print('#');
 
 }
 
@@ -464,47 +313,6 @@ String check(String data) {
 
   return info;
 }
-
-
-
-// bool Check_secret(String code)
-// {
-
-//   String code_1 = code.substring(6, 10);
-//   String code_2 = code.substring(2, 6);
-
-
-//   String secret = code.substring(0, 2);
-//   String tag = code.substring(2, 10);
-
-//   uint16_t  code_1_hex = strtoul(code_1.c_str(), NULL, 16);
-//   uint16_t  code_2_hex = strtoul(code_2.c_str(), NULL, 16);
-//   uint16_t  secret_hex = strtoul(secret.c_str(), NULL, 16);
-
-//   uint16_t modulo_hex = code_1_hex % code_2_hex;
-
-
-//   if (modulo_hex > 256) modulo_hex = modulo_hex % 256;
-
-//   if (modulo_hex == secret_hex)return true;
-//   else {
-//     int allInt = 1;
-//     for (int i = 0; i < code.length(); i++) if ((code[i] >= 'A' && code[i] <= 'F')) allInt = 0;
-//     if (allInt) {
-//       int  secret_int = secret.toInt();
-//       int  code_1_int = code_1.toInt();
-//       int  code_2_int = code_2.toInt();
-//       int modulo_int = code_1_int % code_2_int;
-//       if (modulo_int > 100) modulo_int = modulo_int % 100;
-//       if (modulo_int == secret_int)return true;
-//       else return false;
-//     }
-//     else return false;
-//   }
-
-
-
-// }
 
 
 bool Check_secret(String code) {
@@ -565,8 +373,6 @@ void reglage_heur(String date) {
 
       deltaMilli = abs( milli.toInt() - millis() % 1000);
       writeToEEPROM(deltaMilliMemory, deltaMilli);
-      // EEPROM.write(deltaMilliMemory, deltaMilli);
-      // EEPROM.commit();
 
       Clock.adjust(DateTime(anne.toInt(), mois. toInt(),  jour.toInt(), heur. toInt(), minut. toInt(), sec. toInt()));
 
@@ -597,13 +403,7 @@ void sendCrypto(String Indice, String Date, String RFID){
   memcpy(iv, original_iv, BLOCK_SIZE);
   char plaintext[200]; 
   byte ciphertext[200];
-  // DynamicJsonDocument doc(200);
-  // DynamicJsonDocument send(300);
   String data="";
-  // doc[0]["code"] = RFID;
-  // doc[0]["time"] =  Date;
-  // serializeJson(doc, plaintext);
-  //[{"code":"12345678","time":"2023-09-18 18:17:23.123"}]
   String text = "[{\"code\":\"" + RFID + "\",\"time\":\"" + Date + "\"}]";
   text.toCharArray(plaintext, sizeof(plaintext));
   int enc_len = aesLib.encrypt((byte*)plaintext, strlen(plaintext), ciphertext, key, 256, iv); 
@@ -611,17 +411,8 @@ void sendCrypto(String Indice, String Date, String RFID){
     if(ciphertext[i] < 0x10)  data += "0";
       data += String(ciphertext[i], HEX);
   }
-  // send[0]["indice"] = Indice;
-  // send[0]["time"] =  Date;
-  // send[0]["data"] =  data;
-  //[{"indice":"1","time":"2023-09-18 18:17:23.123","data":"f48c22376ab37c0ee1d4f58a318a4c5a9f1e36dfdf61a8f73e2c998fb30daaeb362d01ce0743ce168c99286347ed5d1f4df5fda38f285be114729fbf778"}]
   text = " [{\"indice\":\"" + Indice + "\",\"time\":\"" + Date + "\",\"data\":\"" + data +"\"}]#";
-  // SerialBT.print(' ');
   SerialBT.print(text);
-  // serializeJson(send, SerialBT);
-  // SerialBT.print('#');
-  // doc.clear();
-  // send.clear();
   memset(plaintext, 0, sizeof(plaintext));
   memset(ciphertext, 0, sizeof(ciphertext));
   memcpy(iv, original_iv, BLOCK_SIZE);
@@ -681,9 +472,6 @@ void storeInEEPROM(String code, String date, int indice, boolean envoi) {
 
 // Fonction mise à jour pour envoyer des données
 void sendData(String code, String date, int indice) {
-  // DynamicJsonDocument doc(200);
-  // String Da = date.substring(4, 8) + "-" + date.substring(2, 4) + "-" + date.substring(0, 2) + " " + date.substring(8, 10) + ":"
-  //             + date.substring(10, 12) + ":" + date.substring(12, 14) + "." + date.substring(14, 17);
   
   String Da = formatDate(date);
   sendCrypto(String(indice), Da, code);
@@ -706,12 +494,8 @@ void Storage(String code, boolean envoi) {
   if (Endrom < 1000) Endrom++;
 
   writeToEEPROM(endRomMemory, Endrom);
-  // EEPROM.write(endRomMemory, Endrom);
-  // EEPROM.commit();
 
   writeToEEPROM(indiceMemory, indice);
-  // EEPROM.write(indiceMemory, indice);
-  // EEPROM.commit();
 }
 
 void writeToEEPROM(int address, int value) {
