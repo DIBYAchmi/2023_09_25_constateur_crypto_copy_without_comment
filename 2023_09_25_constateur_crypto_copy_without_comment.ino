@@ -67,8 +67,11 @@ void setup() {
   ws2812fx.service(); 
 }
 
+
 void loop() {
-    handleBluetoothConnection();
+    bool isBTConnected = SerialBT.connected();
+
+    handleBluetoothConnection(isBTConnected);
 
     processData(esp, Data1);
     processData(Serial, Data3);
@@ -80,46 +83,49 @@ void loop() {
         String Da = formatDate(date);
         tag = code.substring(2, 10);
 
-        if (Check_secret(code)) {
-            if (tag == "12345678") {
-                if (SerialBT.connected()) {
-                    Sound(1);
-                    sendCrypto("ii", Da, tag);
-                } else {
-                    Sound(0);
-                }
-            } else if (checkNewTag(tag)) {
-                int indice = EEPROM.read(0);
-                int endr = EEPROM.read(10);
-
-                if (SerialBT.connected()) {
-                    Sound(1);
-                    sendData(tag, Date(), indice);
-                    writeToEEPROM(0, ++indice);
-                    writeToEEPROM(10, ++endr);
-                } else {
-                    Storage(tag, false);
-                    Sound(0);
-                }
-            }
-        }
+        handleSecretCode(Da, tag, isBTConnected);
     }
 
-    if (SerialBT.available()) {
+    if (isBTConnected && SerialBT.available()) {
         handleReceivedData(SerialBT.readStringUntil('\r'));
     }
 }
 
-void handleBluetoothConnection() {
-    if (SerialBT.connected()) {
-        if (Connect == 1) {
-            printStoreTag();
-            Connect = 0;
-        }
-    } else {
+void handleBluetoothConnection(bool isBTConnected) {
+    if (isBTConnected && Connect == 1) {
+        printStoreTag();
+        Connect = 0;
+    } else if (!isBTConnected) {
         Connect = 1;
     }
 }
+
+
+void handleSecretCode(const String& Da, const String& tag, bool isBTConnected) {
+    if (tag == "12345678") {
+        if (isBTConnected) {
+            Sound(1);
+            sendCrypto("ii", Da, tag);
+        } else {
+            Sound(0);
+        }
+    } else if (checkNewTag(tag)) {
+        int indice = EEPROM.read(0);
+        int endr = EEPROM.read(10);
+
+        if (isBTConnected) {
+            Sound(1);
+            sendData(tag, Date(), indice);
+            writeToEEPROM(0, ++indice);
+            writeToEEPROM(10, ++endr);
+        } else {
+            Storage(tag, false);
+            Sound(0);
+        }
+    }
+}
+
+
 
 void handleReceivedData(String data) {
     if (check(data).equals("date")) {
