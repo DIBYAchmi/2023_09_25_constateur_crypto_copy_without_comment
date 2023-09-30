@@ -93,7 +93,8 @@ void loop() {
 
 void handleBluetoothConnection(bool isBTConnected) {
     if (isBTConnected && Connect == 1) {
-        printStoreTag();
+        // printStoreTag();
+        printData(false);
         Connect = 0;
     } else if (!isBTConnected) {
         Connect = 1;
@@ -133,7 +134,8 @@ void handleReceivedData(String data) {
     } else if (data[0] == 'S') {
         toutSupprimer();
     } else if (data[0] == 'P') {
-        printAllData();
+        // printAllData();
+        printData(true);
     } else if (data[0] == 'B') {
         int moyen = 0;
         String text = " [{\"batterie\":\"" + String(moyen) + "\"}]#";
@@ -147,62 +149,90 @@ String formatDate(String date) {
            date.substring(12, 14) + "." + date.substring(14, 17);
 }
 
-void printStoreTag() {
 
-  int Size ;
-  char   message[16], message1[16];
+void printData(bool allData) {
+    int Size = EEPROM.read(endRomMemory);
+    for (int i = 0; i < Size; i++) {
+        char message[16], message1[16];
+        String check = "", date = "";
 
-  Size = EEPROM.read(endRomMemory);
-  for (int i = 0; i < Size; i++)
-  { String check = "", date = "";
+        eeprom.read(i * 32 + 16, (byte *) message1, sizeof(message1));
+        delay(15);
+        eeprom.read(i * 32, (byte *) message, sizeof(message));
+        delay(15);
+        for (int z = 0; z < 16; z++) {
+            check += message1[z];
+            date += message[z];
+        }
 
-    eeprom.read(i * 32 + 16, (byte *) message1, sizeof(message1));
-    delay(15);
-    eeprom.read(i * 32, (byte *) message, sizeof(message));
-    delay(15);
-    for (int z = 0; z < 16; z++) {
-
-      check += message1[z];
-      date += message[z];
+        if (allData) {
+            String Da = formatDate(date);
+            sendCrypto(String(i), Da, check.substring(0, 8));
+        } else if (message1[11] == '0') {
+            message1[11] = '1';
+            eeprom.write(i * 32 + 16, (byte *) message1, sizeof(message1));
+            sendData(check.substring(0, 8), date, check.substring(8, 11).toInt());
+        }
     }
-
-    if (message1[11] == '0') { 
-      message1[11] = '1';
-      eeprom.write(i * 32 + 16, (byte *) message1, sizeof(message1));
-      sendData(check.substring(0, 8), date, check.substring(8, 11).toInt());
-      //
-    }
-
-  }
-
 }
 
-void printAllData() {
 
-  int Size ;
-  Size = EEPROM.read(endRomMemory);
-  for (int i = 0; i < Size; i++)
-  {
-    char   message[16], message1[16]; 
-    String check = "", date = "";
+// void printStoreTag() {
 
-    eeprom.read(i * 32 + 16, (byte *) message1, sizeof(message1));
-    delay(15);
-    eeprom.read(i * 32, (byte *) message, sizeof(message));
-    delay(15);
-    for (int z = 0; z < 16; z++) {
+//   int Size ;
+//   char   message[16], message1[16];
 
-      check += message1[z];
-      date += message[z];
+//   Size = EEPROM.read(endRomMemory);
+//   for (int i = 0; i < Size; i++)
+//   { String check = "", date = "";
 
-    }
+//     eeprom.read(i * 32 + 16, (byte *) message1, sizeof(message1));
+//     delay(15);
+//     eeprom.read(i * 32, (byte *) message, sizeof(message));
+//     delay(15);
+//     for (int z = 0; z < 16; z++) {
+
+//       check += message1[z];
+//       date += message[z];
+//     }
+
+//     if (message1[11] == '0') { 
+//       message1[11] = '1';
+//       eeprom.write(i * 32 + 16, (byte *) message1, sizeof(message1));
+//       sendData(check.substring(0, 8), date, check.substring(8, 11).toInt());
+//       //
+//     }
+
+//   }
+
+// }
+
+// void printAllData() {
+
+//   int Size ;
+//   Size = EEPROM.read(endRomMemory);
+//   for (int i = 0; i < Size; i++)
+//   {
+//     char   message[16], message1[16]; 
+//     String check = "", date = "";
+
+//     eeprom.read(i * 32 + 16, (byte *) message1, sizeof(message1));
+//     delay(15);
+//     eeprom.read(i * 32, (byte *) message, sizeof(message));
+//     delay(15);
+//     for (int z = 0; z < 16; z++) {
+
+//       check += message1[z];
+//       date += message[z];
+
+//     }
     
-    String Da = formatDate(date);
+//     String Da = formatDate(date);
 
-    sendCrypto(String(i), Da,check.substring(0, 8));
+//     sendCrypto(String(i), Da,check.substring(0, 8));
 
-  }
-}
+//   }
+// }
 
 
 bool checkNewTag(String card)
