@@ -147,10 +147,6 @@ String formatDate(String date) {
            date.substring(12, 14) + "." + date.substring(14, 17);
 }
 
-
-
-
-
 void printStoreTag() {
 
   int Size ;
@@ -170,9 +166,6 @@ void printStoreTag() {
       date += message[z];
     }
 
-
-
-
     if (message1[11] == '0') { 
       message1[11] = '1';
       eeprom.write(i * 32 + 16, (byte *) message1, sizeof(message1));
@@ -184,7 +177,32 @@ void printStoreTag() {
 
 }
 
+void printAllData() {
 
+  int Size ;
+  Size = EEPROM.read(endRomMemory);
+  for (int i = 0; i < Size; i++)
+  {
+    char   message[16], message1[16]; 
+    String check = "", date = "";
+
+    eeprom.read(i * 32 + 16, (byte *) message1, sizeof(message1));
+    delay(15);
+    eeprom.read(i * 32, (byte *) message, sizeof(message));
+    delay(15);
+    for (int z = 0; z < 16; z++) {
+
+      check += message1[z];
+      date += message[z];
+
+    }
+    
+    String Da = formatDate(date);
+
+    sendCrypto(String(i), Da,check.substring(0, 8));
+
+  }
+}
 
 
 bool checkNewTag(String card)
@@ -266,33 +284,6 @@ String Date() {
   return formattedDate;
 }
 
-
-void printAllData() {
-
-  int Size ;
-  Size = EEPROM.read(endRomMemory);
-  for (int i = 0; i < Size; i++)
-  {
-    char   message[16], message1[16]; 
-    String check = "", date = "";
-
-    eeprom.read(i * 32 + 16, (byte *) message1, sizeof(message1));
-    delay(15);
-    eeprom.read(i * 32, (byte *) message, sizeof(message));
-    delay(15);
-    for (int z = 0; z < 16; z++) {
-
-      check += message1[z];
-      date += message[z];
-
-    }
-    
-    String Da = formatDate(date);
-
-    sendCrypto(String(i), Da,check.substring(0, 8));
-
-  }
-}
 
 
 
